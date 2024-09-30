@@ -78,10 +78,19 @@ print(f"Linear Regression - MSE trên tập huấn luyện: {train_mse_lin:.4f},
 print(f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin:.4f}, RMSE trên tập kiểm tra: {test_rmse_lin:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
-plt.scatter(Y_test, test_predictions_lin)
+plt.figure(figsize=(8, 6))
+plt.scatter(Y_test, test_predictions_lin, label='Dự đoán', alpha=0.6)
+plt.plot(Y_test, Y_test, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
 plt.title("Linear Regression: Giá thực tế vs Giá dự đoán (Tập kiểm tra)")
+
+# Hiển thị các đánh giá trên biểu đồ
+plt.text(0.05, 0.95, f'R²: {test_r2_score_lin:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.90, f'MSE: {test_mse_lin:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.85, f'RMSE: {test_rmse_lin:.2f}', transform=plt.gca().transAxes)
+
+plt.legend()
 plt.show()
 
 ### 2. Mô hình Lasso Regression
@@ -107,10 +116,19 @@ print(f"Lasso Regression - MSE trên tập huấn luyện: {train_mse_lasso:.4f}
 print(f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso:.4f}, RMSE trên tập kiểm tra: {test_rmse_lasso:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
-plt.scatter(Y_test, test_predictions_lasso)
+plt.figure(figsize=(8, 6))
+plt.scatter(Y_test, test_predictions_lasso, label='Dự đoán', alpha=0.6)
+plt.plot(Y_test, Y_test, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
 plt.title("Lasso Regression: Giá thực tế vs Giá dự đoán (Tập kiểm tra)")
+
+# Hiển thị các đánh giá trên biểu đồ
+plt.text(0.05, 0.95, f'R²: {test_r2_score_lasso:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.90, f'MSE: {test_mse_lasso:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.85, f'RMSE: {test_rmse_lasso:.2f}', transform=plt.gca().transAxes)
+
+plt.legend()
 plt.show()
 
 ### 3. Mô hình Neural Network (Mạng Nơron)
@@ -136,27 +154,35 @@ print(f"Neural Network - MSE trên tập huấn luyện: {train_mse_nn:.4f}, MSE
 print(f"Neural Network - RMSE trên tập huấn luyện: {train_rmse_nn:.4f}, RMSE trên tập kiểm tra: {test_rmse_nn:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
-plt.scatter(Y_test, test_predictions_nn)
+plt.figure(figsize=(8, 6))
+plt.scatter(Y_test, test_predictions_nn, label='Dự đoán', alpha=0.6)
+plt.plot(Y_test, Y_test, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
 plt.title("Neural Network: Giá thực tế vs Giá dự đoán (Tập kiểm tra)")
+
+# Hiển thị các đánh giá trên biểu đồ
+plt.text(0.05, 0.95, f'R²: {test_r2_score_nn:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.90, f'MSE: {test_mse_nn:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.85, f'RMSE: {test_rmse_nn:.2f}', transform=plt.gca().transAxes)
+
+plt.legend()
 plt.show()
 
 ### 4. Stacking Regressor
 
-# Tạo mô hình stacking
-estimators = [
-    ('linear', LinearRegression()),
-    ('lasso', Lasso()),
-    ('nn', MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=1000, random_state=2))
+# Định nghĩa mô hình stacking regressor
+base_models = [
+    ('linear', lin_reg_model),
+    ('lasso', lass_reg_model),
+    ('nn', nn_model)
 ]
-
-stacked_model = StackingRegressor(estimators=estimators, final_estimator=LinearRegression())
-stacked_model.fit(X_train, Y_train)
+stacking_model = StackingRegressor(estimators=base_models, final_estimator=LinearRegression())
+stacking_model.fit(X_train, Y_train)
 
 # Dự đoán trên tập huấn luyện và kiểm tra
-train_predictions_stacked = stacked_model.predict(X_train)
-test_predictions_stacked = stacked_model.predict(X_test)
+train_predictions_stacked = stacking_model.predict(X_train)
+test_predictions_stacked = stacking_model.predict(X_test)
 
 # Tính toán các chỉ số đánh giá cho Stacking Regressor
 train_r2_score_stacked = r2_score(Y_train, train_predictions_stacked)
@@ -171,8 +197,17 @@ print(f"Stacking Regressor - MSE trên tập huấn luyện: {train_mse_stacked:
 print(f"Stacking Regressor - RMSE trên tập huấn luyện: {train_rmse_stacked:.4f}, RMSE trên tập kiểm tra: {test_rmse_stacked:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
-plt.scatter(Y_test, test_predictions_stacked)
+plt.figure(figsize=(8, 6))
+plt.scatter(Y_test, test_predictions_stacked, label='Dự đoán', alpha=0.6)
+plt.plot(Y_test, Y_test, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
 plt.title("Stacking Regressor: Giá thực tế vs Giá dự đoán (Tập kiểm tra)")
+
+# Hiển thị các đánh giá trên biểu đồ
+plt.text(0.05, 0.95, f'R²: {test_r2_score_stacked:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.90, f'MSE: {test_mse_stacked:.2f}', transform=plt.gca().transAxes)
+plt.text(0.05, 0.85, f'RMSE: {test_rmse_stacked:.2f}', transform=plt.gca().transAxes)
+
+plt.legend()
 plt.show()
