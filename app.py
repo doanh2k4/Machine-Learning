@@ -12,7 +12,7 @@ from sklearn.neural_network import MLPRegressor  # Mô hình Neural Network
 
 # Thu thập và xử lý dữ liệu
 # Đọc dữ liệu từ file CSV vào dataframe của pandas
-car_dataset = pd.read_csv('car data.csv')
+car_dataset = pd.read_csv('./CarData.csv')
 
 # Kiểm tra 5 dòng đầu tiên của dữ liệu
 print(car_dataset.head())
@@ -73,9 +73,9 @@ test_mse_lin = mean_squared_error(Y_test, test_predictions_lin)
 train_rmse_lin = np.sqrt(train_mse_lin)
 test_rmse_lin = np.sqrt(test_mse_lin)
 
-print(f"Linear Regression - R² trên tập huấn luyện: {train_r2_score_lin}, R² trên tập kiểm tra: {test_r2_score_lin}")
-print(f"Linear Regression - MSE trên tập huấn luyện: {train_mse_lin}, MSE trên tập kiểm tra: {test_mse_lin}")
-print(f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin}, RMSE trên tập kiểm tra: {test_rmse_lin}")
+print(f"Linear Regression - R² trên tập huấn luyện: {train_r2_score_lin:.4f}, R² trên tập kiểm tra: {test_r2_score_lin:.4f}")
+print(f"Linear Regression - MSE trên tập huấn luyện: {train_mse_lin:.4f}, MSE trên tập kiểm tra: {test_mse_lin:.4f}")
+print(f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin:.4f}, RMSE trên tập kiểm tra: {test_rmse_lin:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.scatter(Y_test, test_predictions_lin)
@@ -102,9 +102,9 @@ test_mse_lasso = mean_squared_error(Y_test, test_predictions_lasso)
 train_rmse_lasso = np.sqrt(train_mse_lasso)
 test_rmse_lasso = np.sqrt(test_mse_lasso)
 
-print(f"Lasso Regression - R² trên tập huấn luyện: {train_r2_score_lasso}, R² trên tập kiểm tra: {test_r2_score_lasso}")
-print(f"Lasso Regression - MSE trên tập huấn luyện: {train_mse_lasso}, MSE trên tập kiểm tra: {test_mse_lasso}")
-print(f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso}, RMSE trên tập kiểm tra: {test_rmse_lasso}")
+print(f"Lasso Regression - R² trên tập huấn luyện: {train_r2_score_lasso:.4f}, R² trên tập kiểm tra: {test_r2_score_lasso:.4f}")
+print(f"Lasso Regression - MSE trên tập huấn luyện: {train_mse_lasso:.4f}, MSE trên tập kiểm tra: {test_mse_lasso:.4f}")
+print(f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso:.4f}, RMSE trên tập kiểm tra: {test_rmse_lasso:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.scatter(Y_test, test_predictions_lasso)
@@ -131,9 +131,9 @@ test_mse_nn = mean_squared_error(Y_test, test_predictions_nn)
 train_rmse_nn = np.sqrt(train_mse_nn)
 test_rmse_nn = np.sqrt(test_mse_nn)
 
-print(f"Neural Network - R² trên tập huấn luyện: {train_r2_score_nn}, R² trên tập kiểm tra: {test_r2_score_nn}")
-print(f"Neural Network - MSE trên tập huấn luyện: {train_mse_nn}, MSE trên tập kiểm tra: {test_mse_nn}")
-print(f"Neural Network - RMSE trên tập huấn luyện: {train_rmse_nn}, RMSE trên tập kiểm tra: {test_rmse_nn}")
+print(f"Neural Network - R² trên tập huấn luyện: {train_r2_score_nn:.4f}, R² trên tập kiểm tra: {test_r2_score_nn:.4f}")
+print(f"Neural Network - MSE trên tập huấn luyện: {train_mse_nn:.4f}, MSE trên tập kiểm tra: {test_mse_nn:.4f}")
+print(f"Neural Network - RMSE trên tập huấn luyện: {train_rmse_nn:.4f}, RMSE trên tập kiểm tra: {test_rmse_nn:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.scatter(Y_test, test_predictions_nn)
@@ -166,9 +166,9 @@ test_mse_stacked = mean_squared_error(Y_test, test_predictions_stacked)
 train_rmse_stacked = np.sqrt(train_mse_stacked)
 test_rmse_stacked = np.sqrt(test_mse_stacked)
 
-print(f"Stacking Regressor - R² trên tập huấn luyện: {train_r2_score_stacked}, R² trên tập kiểm tra: {test_r2_score_stacked}")
-print(f"Stacking Regressor - MSE trên tập huấn luyện: {train_mse_stacked}, MSE trên tập kiểm tra: {test_mse_stacked}")
-print(f"Stacking Regressor - RMSE trên tập huấn luyện: {train_rmse_stacked}, RMSE trên tập kiểm tra: {test_rmse_stacked}")
+print(f"Stacking Regressor - R² trên tập huấn luyện: {train_r2_score_stacked:.4f}, R² trên tập kiểm tra: {test_r2_score_stacked:.4f}")
+print(f"Stacking Regressor - MSE trên tập huấn luyện: {train_mse_stacked:.4f}, MSE trên tập kiểm tra: {test_mse_stacked:.4f}")
+print(f"Stacking Regressor - RMSE trên tập huấn luyện: {train_rmse_stacked:.4f}, RMSE trên tập kiểm tra: {test_rmse_stacked:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.scatter(Y_test, test_predictions_stacked)
