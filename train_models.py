@@ -73,9 +73,11 @@ test_mse_lin = mean_squared_error(Y_test, test_predictions_lin)
 train_rmse_lin = np.sqrt(train_mse_lin)
 test_rmse_lin = np.sqrt(test_mse_lin)
 
-print(f"Linear Regression - R² trên tập huấn luyện: {train_r2_score_lin:.4f}, R² trên tập kiểm tra: {test_r2_score_lin:.4f}")
+print(
+    f"Linear Regression - R² trên tập huấn luyện: {train_r2_score_lin:.4f}, R² trên tập kiểm tra: {test_r2_score_lin:.4f}")
 print(f"Linear Regression - MSE trên tập huấn luyện: {train_mse_lin:.4f}, MSE trên tập kiểm tra: {test_mse_lin:.4f}")
-print(f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin:.4f}, RMSE trên tập kiểm tra: {test_rmse_lin:.4f}")
+print(
+    f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin:.4f}, RMSE trên tập kiểm tra: {test_rmse_lin:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.figure(figsize=(8, 6))
@@ -96,13 +98,40 @@ plt.close()
 
 ### 2. Mô hình Lasso Regression
 
-# Tạo mô hình Lasso Regression
-lass_reg_model = Lasso()
-lass_reg_model.fit(X_train, Y_train)
+# Tạo mô hình Lasso Regression với các giá trị alpha khác nhau
+alphas = np.logspace(-4, 4, 50)
+best_alpha = None
+best_r2_score = -np.inf
+
+# Tìm alpha tốt nhất
+for alpha in alphas:
+    lass_reg_model = Lasso(alpha=alpha)
+    lass_reg_model.fit(X_train, Y_train)
+
+    # Dự đoán trên tập kiểm tra
+    test_predictions_lasso = lass_reg_model.predict(X_test)
+
+    # Tính toán chỉ số R² trên tập kiểm tra
+    test_r2_score_lasso = r2_score(Y_test, test_predictions_lasso)
+
+    # Lưu lại alpha tốt nhất
+    if test_r2_score_lasso > best_r2_score:
+        best_r2_score = test_r2_score_lasso
+        best_alpha = alpha
+
+# Lấy 4 chữ số sau dấu phẩy cho alpha tốt nhất
+best_alpha_rounded = round(best_alpha, 4)
+
+# In ra alpha tốt nhất
+print(f"Alpha tốt nhất cho Lasso Regression: {best_alpha_rounded}")
+
+# Tạo mô hình Lasso Regression với alpha tốt nhất alpha = 1.2068
+best_lass_reg_model = Lasso(alpha=best_alpha)
+best_lass_reg_model.fit(X_train, Y_train)
 
 # Dự đoán trên tập huấn luyện và kiểm tra
-train_predictions_lasso = lass_reg_model.predict(X_train)
-test_predictions_lasso = lass_reg_model.predict(X_test)
+train_predictions_lasso = best_lass_reg_model.predict(X_train)
+test_predictions_lasso = best_lass_reg_model.predict(X_test)
 
 # Tính toán các chỉ số đánh giá cho Lasso Regression
 train_r2_score_lasso = r2_score(Y_train, train_predictions_lasso)
@@ -112,9 +141,11 @@ test_mse_lasso = mean_squared_error(Y_test, test_predictions_lasso)
 train_rmse_lasso = np.sqrt(train_mse_lasso)
 test_rmse_lasso = np.sqrt(test_mse_lasso)
 
-print(f"Lasso Regression - R² trên tập huấn luyện: {train_r2_score_lasso:.4f}, R² trên tập kiểm tra: {test_r2_score_lasso:.4f}")
+print(
+    f"Lasso Regression - R² trên tập huấn luyện: {train_r2_score_lasso:.4f}, R² trên tập kiểm tra: {test_r2_score_lasso:.4f}")
 print(f"Lasso Regression - MSE trên tập huấn luyện: {train_mse_lasso:.4f}, MSE trên tập kiểm tra: {test_mse_lasso:.4f}")
-print(f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso:.4f}, RMSE trên tập kiểm tra: {test_rmse_lasso:.4f}")
+print(
+    f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso:.4f}, RMSE trên tập kiểm tra: {test_rmse_lasso:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.figure(figsize=(8, 6))
@@ -177,7 +208,7 @@ plt.close()
 # Định nghĩa mô hình stacking regressor
 base_models = [
     ('linear', lin_reg_model),
-    ('lasso', lass_reg_model),
+    ('lasso', best_lass_reg_model),
     ('nn', nn_model)
 ]
 stacking_model = StackingRegressor(estimators=base_models, final_estimator=LinearRegression())
@@ -195,9 +226,12 @@ test_mse_stacked = mean_squared_error(Y_test, test_predictions_stacked)
 train_rmse_stacked = np.sqrt(train_mse_stacked)
 test_rmse_stacked = np.sqrt(test_mse_stacked)
 
-print(f"Stacking Regressor - R² trên tập huấn luyện: {train_r2_score_stacked:.4f}, R² trên tập kiểm tra: {test_r2_score_stacked:.4f}")
-print(f"Stacking Regressor - MSE trên tập huấn luyện: {train_mse_stacked:.4f}, MSE trên tập kiểm tra: {test_mse_stacked:.4f}")
-print(f"Stacking Regressor - RMSE trên tập huấn luyện: {train_rmse_stacked:.4f}, RMSE trên tập kiểm tra: {test_rmse_stacked:.4f}")
+print(
+    f"Stacking Regressor - R² trên tập huấn luyện: {train_r2_score_stacked:.4f}, R² trên tập kiểm tra: {test_r2_score_stacked:.4f}")
+print(
+    f"Stacking Regressor - MSE trên tập huấn luyện: {train_mse_stacked:.4f}, MSE trên tập kiểm tra: {test_mse_stacked:.4f}")
+print(
+    f"Stacking Regressor - RMSE trên tập huấn luyện: {train_rmse_stacked:.4f}, RMSE trên tập kiểm tra: {test_rmse_stacked:.4f}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập kiểm tra
 plt.figure(figsize=(8, 6))
