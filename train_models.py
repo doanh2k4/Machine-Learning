@@ -349,3 +349,12 @@ plt.legend()
 plt.tight_layout()
 plt.savefig('graph/stacking_regressor.png')  # Lưu biểu đồ
 plt.close()
+
+# Lưu các mô hình
+import joblib
+
+joblib.dump(lin_reg_model, 'models/linear_regression_model.joblib')
+joblib.dump(best_lass_reg_model, 'models/lasso_regression_model.joblib')
+joblib.dump(nn_model, 'models/neural_network_model.joblib')
+joblib.dump(stacking_model, 'models/stacking_regressor_model.joblib')
+joblib.dump(scaler, 'models/scaler.joblib')
