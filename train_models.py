@@ -91,7 +91,8 @@ plt.text(0.05, 0.90, f'MSE: {test_mse_lin:.2f}', transform=plt.gca().transAxes)
 plt.text(0.05, 0.85, f'RMSE: {test_rmse_lin:.2f}', transform=plt.gca().transAxes)
 
 plt.legend()
-plt.show()
+plt.savefig('images/linear_regression.png')  # Lưu biểu đồ
+plt.close()
 
 ### 2. Mô hình Lasso Regression
 
@@ -129,7 +130,8 @@ plt.text(0.05, 0.90, f'MSE: {test_mse_lasso:.2f}', transform=plt.gca().transAxes
 plt.text(0.05, 0.85, f'RMSE: {test_rmse_lasso:.2f}', transform=plt.gca().transAxes)
 
 plt.legend()
-plt.show()
+plt.savefig('images/lasso_regression.png')  # Lưu biểu đồ
+plt.close()
 
 ### 3. Mô hình Neural Network (Mạng Nơron)
 
@@ -167,7 +169,8 @@ plt.text(0.05, 0.90, f'MSE: {test_mse_nn:.2f}', transform=plt.gca().transAxes)
 plt.text(0.05, 0.85, f'RMSE: {test_rmse_nn:.2f}', transform=plt.gca().transAxes)
 
 plt.legend()
-plt.show()
+plt.savefig('images/neural_network.png')  # Lưu biểu đồ
+plt.close()
 
 ### 4. Stacking Regressor
 
@@ -210,4 +213,5 @@ plt.text(0.05, 0.90, f'MSE: {test_mse_stacked:.2f}', transform=plt.gca().transAx
 plt.text(0.05, 0.85, f'RMSE: {test_rmse_stacked:.2f}', transform=plt.gca().transAxes)
 
 plt.legend()
-plt.show()
+plt.savefig('images/stacking_regressor.png')  # Lưu biểu đồ
+plt.close()
