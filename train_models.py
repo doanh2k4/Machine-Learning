@@ -212,48 +212,66 @@ plt.close()
 
 ### 3. Mô hình Neural Network (Mạng Nơron)
 
-# Xây dựng mô hình mạng nơron với cấu hình mới
+# Đảm bảo dữ liệu đã được chuẩn hóa
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+X_val_scaled = scaler.transform(X_val)
+
+# Thêm noise vào dữ liệu đầu vào
+noise_level = 0.02
+X_train_noisy = X_train_scaled + np.random.normal(0, noise_level, X_train_scaled.shape)
+
 nn_model = MLPRegressor(
-    hidden_layer_sizes=(10, 5),  # Tăng số lượng nơ-ron và sử dụng hai lớp ẩn
-    max_iter=1000,
-    alpha=1.0,  # Giảm regularization
-    activation='relu',  # Sử dụng hàm kích hoạt ReLU
-    random_state=2,
+    hidden_layer_sizes=(50, 25),  # Điều chỉnh số lượng neuron
+    max_iter=300,  # Giảm số lượng iterations xuống 300
+    alpha=0.01,  # Tăng regularization
+    activation='relu',
+    solver='adam',
+    random_state=42,
+    learning_rate_init=0.001,
+    learning_rate='adaptive',
     early_stopping=True,
+    validation_fraction=0.2,
     n_iter_no_change=20,
-    learning_rate_init=0.01  # Tăng learning rate
+    verbose=True,
+    batch_size=32
 )
-nn_model.fit(X_train_scaled, Y_train)
 
-# Dự đoán trên tập huấn luyện, kiểm tra và xác thực
-train_predictions_nn = nn_model.predict(X_train_scaled)
-test_predictions_nn = nn_model.predict(X_test_scaled)
-val_predictions_nn = nn_model.predict(X_val_scaled)
+# Fit mô hình với dữ liệu có thêm noise
+nn_model.fit(X_train_noisy, Y_train)
 
-# Tính toán các chỉ số đánh giá cho Neural Network
-train_r2_score_nn = r2_score(Y_train, train_predictions_nn)
-test_r2_score_nn = r2_score(Y_test, test_predictions_nn)
-val_r2_score_nn = r2_score(Y_val, val_predictions_nn)
-train_mse_nn = mean_squared_error(Y_train, train_predictions_nn)
-test_mse_nn = mean_squared_error(Y_test, test_predictions_nn)
-val_mse_nn = mean_squared_error(Y_val, val_predictions_nn)
-train_rmse_nn = np.sqrt(train_mse_nn)
-test_rmse_nn = np.sqrt(test_mse_nn)
-val_rmse_nn = np.sqrt(val_mse_nn)
+# Đánh giá mô hình
+train_predictions = nn_model.predict(X_train_scaled)
+test_predictions = nn_model.predict(X_test_scaled)
+val_predictions = nn_model.predict(X_val_scaled)
 
-print(
-    f"Neural Network - R² trên tập huấn luyện: {train_r2_score_nn:.4f}, R² trên tập kiểm tra: {test_r2_score_nn:.4f}, R² trên tập xác thực: {val_r2_score_nn:.4f}")
-print(
-    f"Neural Network - MSE trên tập huấn luyện: {train_mse_nn:.4f}, MSE trên tập kiểm tra: {test_mse_nn:.4f}, MSE trên tập xác thực: {val_mse_nn:.4f}")
-print(
-    f"Neural Network - RMSE trên tập huấn luyện: {train_rmse_nn:.4f}, RMSE trên tập kiểm tra: {test_rmse_nn:.4f}, RMSE trên tập xác thực: {val_rmse_nn:.4f}")
+train_r2 = r2_score(Y_train, train_predictions)
+test_r2 = r2_score(Y_test, test_predictions)
+val_r2 = r2_score(Y_val, val_predictions)
+
+print(f"Neural Network - R² trên tập huấn luyện: {train_r2:.4f}, R² trên tập kiểm tra: {test_r2:.4f}, R² trên tập xác thực: {val_r2:.4f}")
+
+# Vẽ đồ thị loss function
+plt.figure(figsize=(10, 6))
+plt.plot(nn_model.loss_curve_)
+plt.title('Loss Curve của Neural Network')
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.grid(True)
+plt.tight_layout()
+plt.savefig('graph/neural_network_loss.png')
+plt.close()
+
+# In ra số lượng iterations thực tế
+print(f"Số lượng iterations thực tế: {nn_model.n_iter_}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập huấn luyện, kiểm tra và xác thực
 plt.figure(figsize=(18, 6))
 
 # Biểu đồ cho tập huấn luyện
 plt.subplot(1, 3, 1)
-plt.scatter(Y_train, train_predictions_nn, label='Dự đoán', alpha=0.6)
+plt.scatter(Y_train, train_predictions, label='Dự đoán', alpha=0.6)
 plt.plot(Y_train, Y_train, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
@@ -262,7 +280,7 @@ plt.legend()
 
 # Biểu đồ cho tập kiểm tra
 plt.subplot(1, 3, 2)
-plt.scatter(Y_test, test_predictions_nn, label='Dự đoán', alpha=0.6)
+plt.scatter(Y_test, test_predictions, label='Dự đoán', alpha=0.6)
 plt.plot(Y_test, Y_test, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
@@ -271,7 +289,7 @@ plt.legend()
 
 # Biểu đồ cho tập xác thực
 plt.subplot(1, 3, 3)
-plt.scatter(Y_val, val_predictions_nn, label='Dự đoán', alpha=0.6)
+plt.scatter(Y_val, val_predictions, label='Dự đoán', alpha=0.6)
 plt.plot(Y_val, Y_val, color='red', linestyle='--', label='Giá thực tế')
 plt.xlabel("Giá thực tế")
 plt.ylabel("Giá dự đoán")
@@ -308,6 +326,13 @@ val_mse_stacked = mean_squared_error(Y_val, val_predictions_stacked)
 train_rmse_stacked = np.sqrt(train_mse_stacked)
 test_rmse_stacked = np.sqrt(test_mse_stacked)
 val_rmse_stacked = np.sqrt(val_mse_stacked)
+
+print(
+    f"Neural Network - R² trên tập huấn luyện: {train_r2:.4f}, R² trên tập kiểm tra: {test_r2:.4f}, R² trên tập xác thực: {val_r2:.4f}")
+print(
+    f"Neural Network - MSE trên tập huấn luyện: {train_mse_stacked:.4f}, MSE trên tập kiểm tra: {test_mse_stacked:.4f}, MSE trên tập xác thực: {val_mse_stacked:.4f}")
+print(
+    f"Neural Network - RMSE trên tập huấn luyện: {train_rmse_stacked:.4f}, RMSE trên tập kiểm tra: {test_rmse_stacked:.4f}, RMSE trên tập xác thực: {val_rmse_stacked:.4f}")
 
 print(
     f"Stacking Regressor - R² trên tập huấn luyện: {train_r2_score_stacked:.4f}, R² trên tập kiểm tra: {test_r2_score_stacked:.4f}, R² trên tập xác thực: {val_r2_score_stacked:.4f}")
