@@ -20,21 +20,50 @@ if not os.path.exists('graph'):
 car_dataset = pd.read_csv('./CarData.csv')
 
 # Kiểm tra 5 dòng đầu tiên của dữ liệu
+print("5 dòng đầu tiên của dữ liệu:")
 print(car_dataset.head())
 
 # Kiểm tra số hàng và cột
+print("\nSố hàng và cột:")
 print(car_dataset.shape)
 
 # Thông tin về dữ liệu
+print("\nThông tin về dữ liệu:")
 print(car_dataset.info())
 
+# Kiểm tra kiểu dữ liệu của các cột
+print("\nKiểu dữ liệu của các cột:")
+print(car_dataset.dtypes)
+
 # Kiểm tra giá trị bị thiếu
+print("\nSố lượng giá trị bị thiếu trong mỗi cột:")
 print(car_dataset.isnull().sum())
 
+# Kiểm tra tỷ lệ phần trăm giá trị bị thiếu
+print("\nTỷ lệ phần trăm giá trị bị thiếu trong mỗi cột:")
+print((car_dataset.isnull().sum() / len(car_dataset)) * 100)
+
+# Kiểm tra giá trị trùng lặp
+duplicates = car_dataset.duplicated()
+print("\nSố lượng hàng trùng lặp:")
+print(duplicates.sum())
+
+if duplicates.sum() > 0:
+    print("\nCác hàng trùng lặp:")
+    print(car_dataset[duplicates])
+
 # Kiểm tra phân phối của các dữ liệu dạng danh mục (categorical)
+print("\nPhân phối của dữ liệu dạng danh mục:")
+print("Fuel_Type:")
 print(car_dataset.Fuel_Type.value_counts())
+print("\nSeller_Type:")
 print(car_dataset.Seller_Type.value_counts())
+print("\nTransmission:")
 print(car_dataset.Transmission.value_counts())
+
+# Thống kê mô tả cho các cột số
+print("\nThống kê mô tả cho các cột số:")
+print(car_dataset.describe())
 
 # Mã hóa dữ liệu dạng danh mục
 # Mã hóa cột "Fuel_Type"
