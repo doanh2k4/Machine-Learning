@@ -9,6 +9,11 @@ from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import StackingRegressor
 from sklearn.neural_network import MLPRegressor  # Mô hình Neural Network
+import os
+
+# Create 'graph' directory if it doesn't exist
+if not os.path.exists('graph'):
+    os.makedirs('graph')
 
 # Thu thập và xử lý dữ liệu
 # Đọc dữ liệu từ file CSV vào dataframe của pandas
