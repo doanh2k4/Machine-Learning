@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import StackingRegressor
 from sklearn.neural_network import MLPRegressor  # Mô hình Neural Network
 import os
+from sklearn.model_selection import GridSearchCV
 
 # Create 'graph' directory if it doesn't exist
 if not os.path.exists('graph'):
@@ -64,6 +65,37 @@ print(car_dataset.Transmission.value_counts())
 # Thống kê mô tả cho các cột số
 print("\nThống kê mô tả cho các cột số:")
 print(car_dataset.describe())
+
+# Kiểm tra giá trị ngoại lai và xóa chúng
+numeric_columns = car_dataset.select_dtypes(include=[np.number]).columns
+
+print("\nKiểm tra và xóa giá trị ngoại lai:")
+total_outliers = 0
+for column in numeric_columns:
+    Q1 = car_dataset[column].quantile(0.25)
+    Q3 = car_dataset[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    
+    outliers = car_dataset[(car_dataset[column] < lower_bound) | (car_dataset[column] > upper_bound)]
+    
+    print(f"\nCột {column}:")
+    print(f"Số lượng giá trị ngoại lai: {len(outliers)}")
+    print(f"Phần trăm giá trị ngoại lai: {(len(outliers) / len(car_dataset)) * 100:.2f}%")
+    print(f"Giới hạn dưới: {lower_bound}")
+    print(f"Giới hạn trên: {upper_bound}")
+    
+    if len(outliers) > 0:
+        print("Các giá trị ngoại lai:")
+        print(outliers[column].tolist())
+        
+    # Xóa các giá trị ngoại lai
+    car_dataset = car_dataset[(car_dataset[column] >= lower_bound) & (car_dataset[column] <= upper_bound)]
+    total_outliers += len(outliers)
+
+print(f"\nTổng số giá trị ngoại lai đã xóa: {total_outliers}")
+print(f"Số lượng mẫu còn lại sau khi xóa giá trị ngoại lai: {len(car_dataset)}")
 
 # Mã hóa dữ liệu dạng danh mục
 # Mã hóa cột "Fuel_Type"
@@ -252,33 +284,34 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 X_val_scaled = scaler.transform(X_val)
 
-# Thêm noise vào dữ liệu đầu vào
-noise_level = 0.02
-X_train_noisy = X_train_scaled + np.random.normal(0, noise_level, X_train_scaled.shape)
+# Định nghĩa mô hình Neural Network
+nn_model = MLPRegressor(random_state=42, max_iter=500)
 
-nn_model = MLPRegressor(
-    hidden_layer_sizes=(50, 25),  # Điều chỉnh số lượng neuron
-    max_iter=300,  # Giảm số lượng iterations xuống 300
-    alpha=0.01,  # Tăng regularization
-    activation='relu',
-    solver='adam',
-    random_state=42,
-    learning_rate_init=0.001,
-    learning_rate='adaptive',
-    early_stopping=True,
-    validation_fraction=0.2,
-    n_iter_no_change=20,
-    verbose=True,
-    batch_size=32
-)
+# Định nghĩa grid các hyperparameters cần tìm kiếm
+param_grid = {
+    'hidden_layer_sizes': [(50,), (100,), (50, 25), (100, 50)],
+    'activation': ['relu', 'tanh'],
+    'alpha': [0.0001, 0.001, 0.01],
+    'learning_rate': ['constant', 'adaptive'],
+    'learning_rate_init': [0.001, 0.01],
+    'batch_size': [32, 64, 128]
+}
 
-# Fit mô hình với dữ liệu có thêm noise
-nn_model.fit(X_train_noisy, Y_train)
+# Sử dụng GridSearchCV
+grid_search = GridSearchCV(nn_model, param_grid, cv=5, scoring='r2', n_jobs=-1, verbose=2)
+grid_search.fit(X_train_scaled, Y_train)
+
+# In ra best parameters và best score
+print("Best parameters found: ", grid_search.best_params_)
+print("Best cross-validation score: ", grid_search.best_score_)
+
+# Lấy mô hình tốt nhất
+best_nn_model = grid_search.best_estimator_
 
 # Đánh giá mô hình
-train_predictions = nn_model.predict(X_train_scaled)
-test_predictions = nn_model.predict(X_test_scaled)
-val_predictions = nn_model.predict(X_val_scaled)
+train_predictions = best_nn_model.predict(X_train_scaled)
+test_predictions = best_nn_model.predict(X_test_scaled)
+val_predictions = best_nn_model.predict(X_val_scaled)
 
 train_r2 = r2_score(Y_train, train_predictions)
 test_r2 = r2_score(Y_test, test_predictions)
@@ -288,7 +321,7 @@ print(f"Neural Network - R² trên tập huấn luyện: {train_r2:.4f}, R² tr�
 
 # Vẽ đồ thị loss function
 plt.figure(figsize=(10, 6))
-plt.plot(nn_model.loss_curve_)
+plt.plot(best_nn_model.loss_curve_)
 plt.title('Loss Curve của Neural Network')
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
@@ -298,7 +331,7 @@ plt.savefig('graph/neural_network_loss.png')
 plt.close()
 
 # In ra số lượng iterations thực tế
-print(f"Số lượng iterations thực tế: {nn_model.n_iter_}")
+print(f"Số lượng iterations thực tế: {best_nn_model.n_iter_}")
 
 # Vẽ biểu đồ giá thực tế và dự đoán trên tập huấn luyện, kiểm tra và xác thực
 plt.figure(figsize=(18, 6))
@@ -340,7 +373,7 @@ plt.close()
 base_models = [
     ('linear', lin_reg_model),
     ('lasso', best_lass_reg_model),
-    ('nn', nn_model)
+    ('nn', best_nn_model)  # Use the best Neural Network model
 ]
 stacking_model = StackingRegressor(estimators=base_models, final_estimator=LinearRegression())
 stacking_model.fit(X_train, Y_train)
@@ -360,6 +393,20 @@ val_mse_stacked = mean_squared_error(Y_val, val_predictions_stacked)
 train_rmse_stacked = np.sqrt(train_mse_stacked)
 test_rmse_stacked = np.sqrt(test_mse_stacked)
 val_rmse_stacked = np.sqrt(val_mse_stacked)
+
+print(
+    f"Linear Regression - R² trên tập huấn luyện: {train_r2_score_lin:.4f}, R² trên tập kiểm tra: {test_r2_score_lin:.4f}, R² trên tập xác thực: {val_r2_score_lin:.4f}")
+print(
+    f"Linear Regression - MSE trên tập huấn luyện: {train_mse_lin:.4f}, MSE trên tập kiểm tra: {test_mse_lin:.4f}, MSE trên tập xác thực: {val_mse_lin:.4f}")
+print(
+    f"Linear Regression - RMSE trên tập huấn luyện: {train_rmse_lin:.4f}, RMSE trên tập kiểm tra: {test_rmse_lin:.4f}, RMSE trên tập xác thực: {val_rmse_lin:.4f}")
+
+print(
+    f"Lasso Regression - R² trên tập huấn luyện: {train_r2_score_lasso:.4f}, R² trên tập kiểm tra: {test_r2_score_lasso:.4f}, R² trên tập xác thực: {val_r2_score_lasso:.4f}")
+print(
+    f"Lasso Regression - MSE trên tập huấn luyện: {train_mse_lasso:.4f}, MSE trên tập kiểm tra: {test_mse_lasso:.4f}, MSE trên tập xác thực: {val_mse_lasso:.4f}")
+print(
+    f"Lasso Regression - RMSE trên tập huấn luyện: {train_rmse_lasso:.4f}, RMSE trên tập kiểm tra: {test_rmse_lasso:.4f}, RMSE trên tập xác thực: {val_rmse_lasso:.4f}")
 
 print(
     f"Neural Network - R² trên tập huấn luyện: {train_r2:.4f}, R² trên tập kiểm tra: {test_r2:.4f}, R² trên tập xác thực: {val_r2:.4f}")
@@ -411,9 +458,16 @@ plt.close()
 
 # Lưu các mô hình
 import joblib
+import os
+
+# Create 'models' directory if it doesn't exist
+if not os.path.exists('models'):
+    os.makedirs('models')
 
 joblib.dump(lin_reg_model, 'models/linear_regression_model.joblib')
 joblib.dump(best_lass_reg_model, 'models/lasso_regression_model.joblib')
-joblib.dump(nn_model, 'models/neural_network_model.joblib')
+joblib.dump(best_nn_model, 'models/neural_network_model.joblib')
 joblib.dump(stacking_model, 'models/stacking_regressor_model.joblib')
 joblib.dump(scaler, 'models/scaler.joblib')
+
+print("All models have been saved in the 'models' directory.")
