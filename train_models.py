@@ -291,7 +291,7 @@ nn_model = MLPRegressor(random_state=42, max_iter=500)
 param_grid = {
     'hidden_layer_sizes': [(50,), (100,), (50, 25), (100, 50)],
     'activation': ['relu', 'tanh'],
-    'alpha': [0.0001, 0.001, 0.01],
+    'alpha': [0.0001, 0.001, 0.01, 0.1],
     'learning_rate': ['constant', 'adaptive'],
     'learning_rate_init': [0.001, 0.01],
     'batch_size': [32, 64, 128]
